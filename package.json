@@ -1,0 +1,11 @@
+{
+  "name": "memecr",
+  "version": "1.0.0",
+  "description": "Tag memes based on the text in them",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chip Thien",
+  "license": "ISC"
+}
