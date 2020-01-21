@@ -23,16 +23,30 @@ let storeTags = (imagePath: string, tags: string[]) => {
   console.log(row)
 }
 
-fs.readFile(process.argv[2], (err, image) => {
-  if (err) {
-    console.error(err)
-    return
-  }
-  Tesseract.recognize(
-    image,
-    'eng',
-    { logger: m => console.log(m) }
-  ).then(({ data: { text } }) => {
-    storeTags(process.argv[2], analyzeText(text))
+let index = (imagePath: string) => {
+  fs.readFile(imagePath, (err, image) => {
+    if (err) {
+      console.error(err)
+      return
+    }
+    Tesseract.recognize(
+      image,
+      'eng',
+      { logger: m => console.log(m) }
+    ).then(({ data: { text } }) => {
+      storeTags(imagePath, analyzeText(text))
+    })
   })
-})
+}
+
+let search = (tag: string) => {
+  const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(`%${tag}%`) //TODO using LIKE is pretty flaky
+  console.log(row)
+}
+
+let command: string = process.argv[2]
+if (command === "index") {
+  index(process.argv[3])
+} else if (command === "search") {
+  search(process.argv[3])
+}

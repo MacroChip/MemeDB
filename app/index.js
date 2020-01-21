@@ -32,13 +32,26 @@ let storeTags = (imagePath, tags) => {
     const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, tags.join(" "));
     console.log(row);
 };
-fs.readFile(process.argv[2], (err, image) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
-    tesseract_js_1.default.recognize(image, 'eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
-        storeTags(process.argv[2], analyzeText(text));
+let index = (imagePath) => {
+    fs.readFile(imagePath, (err, image) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        tesseract_js_1.default.recognize(image, 'eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
+            storeTags(imagePath, analyzeText(text));
+        });
     });
-});
+};
+let search = (tag) => {
+    const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(`%${tag}%`); //TODO this finds too many
+    console.log(row);
+};
+let command = process.argv[2];
+if (command === "index") {
+    index(process.argv[3]);
+}
+else if (command === "search") {
+    search(process.argv[3]);
+}
 //# sourceMappingURL=index.js.map
