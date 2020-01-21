@@ -2,10 +2,18 @@
   "name": "memecr",
   "version": "1.0.0",
   "description": "Tag memes based on the text in them",
-  "main": "index.js",
+  "main": "app/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "start": "tsc && node app/index.js"
   },
   "author": "Chip Thien",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^13.1.8",
+    "is-word": "^1.0.4",
+    "tesseract.js": "^2.0.2",
+    "typescript": "^3.7.5"
+  }
 }
