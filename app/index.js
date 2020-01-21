@@ -14,13 +14,23 @@ const tesseract_js_1 = __importDefault(require("tesseract.js"));
 const fs = __importStar(require("fs"));
 const is_word_1 = __importDefault(require("is-word"));
 const words = is_word_1.default('american-english');
+const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
+const db = better_sqlite3_1.default('meme-tags.db');
+db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
+  path TEXT,
+  tags TEXT
+)`).run();
 let analyzeText = (text) => {
-    text.split(/\s+/)
-        .forEach(item => {
+    return text.split(/\s+/)
+        .map(item => {
         if (item.length > 1 && words.check(item.toLowerCase())) {
-            console.log(item.toLowerCase());
+            return item.toLowerCase();
         }
     });
+};
+let storeTags = (imagePath, tags) => {
+    const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, tags.join(" "));
+    console.log(row);
 };
 fs.readFile(process.argv[2], (err, image) => {
     if (err) {
@@ -28,8 +38,7 @@ fs.readFile(process.argv[2], (err, image) => {
         return;
     }
     tesseract_js_1.default.recognize(image, 'eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
-        // console.log("Text: " + text)
-        analyzeText(text);
+        storeTags(process.argv[2], analyzeText(text));
     });
 });
 //# sourceMappingURL=index.js.map
