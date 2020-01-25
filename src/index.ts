@@ -19,7 +19,10 @@ let analyzeText = (text: string) => {
 }
 
 let storeTags = (imagePath: string, tags: string[]) => {
-  const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, tags.join(" "))
+  console.log("tags " + JSON.stringify(tags))
+  let joinedTags = " " + tags.join(" ") + " "
+  console.log("joined tags " + JSON.stringify(joinedTags))
+  const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, joinedTags)
   console.log(row)
 }
 
@@ -40,7 +43,7 @@ let index = (imagePath: string) => {
 }
 
 let search = (tag: string) => {
-  const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(`%${tag}%`) //TODO using LIKE is pretty flaky
+  const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(` %${tag}% `) //TODO using LIKE is pretty flaky
   console.log(row)
 }
 

@@ -29,7 +29,10 @@ let analyzeText = (text) => {
     });
 };
 let storeTags = (imagePath, tags) => {
-    const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, tags.join(" "));
+    console.log("tags " + JSON.stringify(tags));
+    let joinedTags = " " + tags.join(" ") + " ";
+    console.log("joined tags " + JSON.stringify(joinedTags));
+    const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, joinedTags);
     console.log(row);
 };
 let index = (imagePath) => {
@@ -44,7 +47,7 @@ let index = (imagePath) => {
     });
 };
 let search = (tag) => {
-    const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(`%${tag}%`); //TODO this finds too many
+    const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(` %${tag}% `); //TODO using LIKE is pretty flaky
     console.log(row);
 };
 let command = process.argv[2];
