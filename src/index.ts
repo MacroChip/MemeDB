@@ -31,10 +31,10 @@ let storeTags = (imagePath: string, tags: string[]) => {
 
 let index = (imagePath: string) => {
   fs.stat(imagePath)
-    .then(stats => {
+    .then(async stats => {
       if (stats.isDirectory()) {
-        return fs.readdir(imagePath)
-          .then(files => Promise.all(files.map(file => indexSingleFile(`${imagePath}/${file}`))))
+        const files = await fs.readdir(imagePath)
+        return await Promise.all(files.map(file => indexSingleFile(`${imagePath}/${file}`)))
       } else if (stats.isFile()) {
         return indexSingleFile(imagePath)
       } else {
@@ -43,18 +43,14 @@ let index = (imagePath: string) => {
     })
 }
 
-let indexSingleFile = (imagePath: string) => {
-  return fs.readFile(imagePath)
-    .then(image => {
-      return Tesseract.recognize(
-        image,
-        'eng',
-        { logger: m => console.log(m) }
-      ).then(({ data: { text } }) => {
-        return storeTags(imagePath, analyzeText(text))
-      })
-    })
-    .catch(error => console.error(error))
+let indexSingleFile = async (imagePath: string) => {
+  try {
+    const image = await fs.readFile(imagePath)
+    const { data: { text } } = await Tesseract.recognize(image, 'eng', { logger: m => console.log(m) })
+    return storeTags(imagePath, analyzeText(text))
+  } catch (error) {
+    return console.error(error)
+  }
 }
 
 let search = (tag: string) => {
