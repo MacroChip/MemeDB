@@ -1,5 +1,5 @@
 import Tesseract from "tesseract.js"
-import * as fs from "fs"
+import { promises as fs } from "fs"
 import isWord from 'is-word'
 const words = isWord('american-english')
 import betterSqlite3 from 'better-sqlite3'
@@ -27,19 +27,17 @@ let storeTags = (imagePath: string, tags: string[]) => {
 }
 
 let index = (imagePath: string) => {
-  fs.readFile(imagePath, (err, image) => {
-    if (err) {
-      console.error(err)
-      return
-    }
-    Tesseract.recognize(
-      image,
-      'eng',
-      { logger: m => console.log(m) }
-    ).then(({ data: { text } }) => {
-      storeTags(imagePath, analyzeText(text))
+  fs.readFile(imagePath)
+    .then(image => {
+      Tesseract.recognize(
+        image,
+        'eng',
+        { logger: m => console.log(m) }
+      ).then(({ data: { text } }) => {
+        storeTags(imagePath, analyzeText(text))
+      })
     })
-  })
+    .catch(error => console.error(error))
 }
 
 let search = (tag: string) => {
