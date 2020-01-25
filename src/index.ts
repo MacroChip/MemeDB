@@ -9,7 +9,7 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
   tags TEXT
 )`).run()
 
-let analyzeText = (text: string) => {
+let analyzeText = (text: string) => { //how is a capitalized word getting through there?
   return text.split(/\s+/)
     .filter(item => {
       if (item.length > 1 && words.check(item.toLowerCase())) {
@@ -19,22 +19,39 @@ let analyzeText = (text: string) => {
 }
 
 let storeTags = (imagePath: string, tags: string[]) => {
-  console.log("tags " + JSON.stringify(tags))
-  let joinedTags = " " + tags.join(" ") + " "
-  console.log("joined tags " + JSON.stringify(joinedTags))
-  const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, joinedTags)
-  console.log(row)
+  return new Promise((res, rej) => {
+    console.log("tags " + JSON.stringify(tags))
+    let joinedTags = " " + tags.join(" ") + " "
+    console.log("joined tags " + JSON.stringify(joinedTags))
+    const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, joinedTags)
+    console.log(row)
+    res()
+  })
 }
 
 let index = (imagePath: string) => {
-  fs.readFile(imagePath)
+  fs.stat(imagePath)
+    .then(stats => {
+      if (stats.isDirectory()) {
+        return fs.readdir(imagePath)
+          .then(files => Promise.all(files.map(file => indexSingleFile(`${imagePath}/${file}`))))
+      } else if (stats.isFile()) {
+        return indexSingleFile(imagePath)
+      } else {
+        console.error("Cannot search for that")
+      }
+    })
+}
+
+let indexSingleFile = (imagePath: string) => {
+  return fs.readFile(imagePath)
     .then(image => {
-      Tesseract.recognize(
+      return Tesseract.recognize(
         image,
         'eng',
         { logger: m => console.log(m) }
       ).then(({ data: { text } }) => {
-        storeTags(imagePath, analyzeText(text))
+        return storeTags(imagePath, analyzeText(text))
       })
     })
     .catch(error => console.error(error))

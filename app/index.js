@@ -2,16 +2,9 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const tesseract_js_1 = __importDefault(require("tesseract.js"));
-const fs = __importStar(require("fs"));
+const fs_1 = require("fs");
 const is_word_1 = __importDefault(require("is-word"));
 const words = is_word_1.default('american-english');
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
@@ -29,22 +22,38 @@ let analyzeText = (text) => {
     });
 };
 let storeTags = (imagePath, tags) => {
-    console.log("tags " + JSON.stringify(tags));
-    let joinedTags = " " + tags.join(" ") + " ";
-    console.log("joined tags " + JSON.stringify(joinedTags));
-    const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, joinedTags);
-    console.log(row);
+    return new Promise((res, rej) => {
+        console.log("tags " + JSON.stringify(tags));
+        let joinedTags = " " + tags.join(" ") + " ";
+        console.log("joined tags " + JSON.stringify(joinedTags));
+        const row = db.prepare('INSERT INTO Tags (path, tags) VALUES (?, ?)').run(imagePath, joinedTags);
+        console.log(row);
+        res();
+    });
 };
 let index = (imagePath) => {
-    fs.readFile(imagePath, (err, image) => {
-        if (err) {
-            console.error(err);
-            return;
+    fs_1.promises.stat(imagePath)
+        .then(stats => {
+        if (stats.isDirectory()) {
+            return fs_1.promises.readdir(imagePath)
+                .then(files => Promise.all(files.map(file => indexSingleFile(`${imagePath}/${file}`))));
         }
-        tesseract_js_1.default.recognize(image, 'eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
-            storeTags(imagePath, analyzeText(text));
-        });
+        else if (stats.isFile()) {
+            return indexSingleFile(imagePath);
+        }
+        else {
+            console.error("Cannot search for that");
+        }
     });
+};
+let indexSingleFile = (imagePath) => {
+    return fs_1.promises.readFile(imagePath)
+        .then(image => {
+        return tesseract_js_1.default.recognize(image, 'eng', { logger: m => console.log(m) }).then(({ data: { text } }) => {
+            return storeTags(imagePath, analyzeText(text));
+        });
+    })
+        .catch(error => console.error(error));
 };
 let search = (tag) => {
     const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(` %${tag}% `); //TODO using LIKE is pretty flaky
