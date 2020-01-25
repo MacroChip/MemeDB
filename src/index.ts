@@ -11,7 +11,7 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
 
 let analyzeText = (text: string) => {
   return text.split(/\s+/)
-    .map(item => {
+    .filter(item => {
       if (item.length > 1 && words.check(item.toLowerCase())) {
         return item.toLowerCase()
       }

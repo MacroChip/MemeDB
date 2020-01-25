@@ -22,7 +22,7 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
 )`).run();
 let analyzeText = (text) => {
     return text.split(/\s+/)
-        .map(item => {
+        .filter(item => {
         if (item.length > 1 && words.check(item.toLowerCase())) {
             return item.toLowerCase();
         }
