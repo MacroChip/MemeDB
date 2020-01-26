@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const tesseract_js_1 = __importDefault(require("tesseract.js"));
 const fs_1 = require("fs");
+const path_1 = __importDefault(require("path"));
 const is_word_1 = __importDefault(require("is-word"));
 const words = is_word_1.default('american-english');
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
@@ -23,8 +24,9 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
   tags TEXT
 )`).run();
 let analyzeText = (text) => text.split(/\s+/)
-    .filter(item => item.length > 1 && words.check(item.toLowerCase()))
-    .map(item => item.toLowerCase());
+    .filter(item => item.length > 1)
+    .map(item => item.toLowerCase())
+    .filter(item => words.check(item));
 let storeTags = (imagePath, tags) => {
     return new Promise((res, rej) => {
         console.log("tags " + JSON.stringify(tags));
@@ -40,7 +42,9 @@ let index = (imagePath) => {
         .then((stats) => __awaiter(void 0, void 0, void 0, function* () {
         if (stats.isDirectory()) {
             const files = yield fs_1.promises.readdir(imagePath);
-            return yield Promise.all(files.map(file => indexSingleFile(`${imagePath}/${file}`)));
+            return yield Promise.all(files
+                .map(file => path_1.default.join(imagePath, file))
+                .map(joinedPath => indexSingleFile(joinedPath)));
         }
         else if (stats.isFile()) {
             return indexSingleFile(imagePath);

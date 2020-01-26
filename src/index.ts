@@ -1,5 +1,6 @@
 import Tesseract from "tesseract.js"
 import { promises as fs } from "fs"
+import path from "path"
 import isWord from 'is-word'
 const words = isWord('american-english')
 import betterSqlite3 from 'better-sqlite3'
@@ -11,8 +12,9 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
 
 let analyzeText = (text: string) =>
   text.split(/\s+/)
-    .filter(item => item.length > 1 && words.check(item.toLowerCase()))
+    .filter(item => item.length > 1)
     .map(item => item.toLowerCase())
+    .filter(item => words.check(item))
 
 let storeTags = (imagePath: string, tags: string[]) => {
   return new Promise((res, rej) => {
@@ -30,7 +32,11 @@ let index = (imagePath: string) => {
     .then(async stats => {
       if (stats.isDirectory()) {
         const files = await fs.readdir(imagePath)
-        return await Promise.all(files.map(file => indexSingleFile(`${imagePath}/${file}`)))
+        return await Promise.all(
+          files
+            .map(file => path.join(imagePath, file))
+            .map(joinedPath => indexSingleFile(joinedPath))
+        )
       } else if (stats.isFile()) {
         return indexSingleFile(imagePath)
       } else {
