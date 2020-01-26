@@ -31,18 +31,22 @@ let index = (imagePath: string) => {
   fs.stat(imagePath)
     .then(async stats => {
       if (stats.isDirectory()) {
-        const files = await fs.readdir(imagePath)
-        return await Promise.all(
-          files
-            .map(file => path.join(imagePath, file))
-            .map(joinedPath => indexSingleFile(joinedPath))
-        )
+        return indexDirectory(imagePath)
       } else if (stats.isFile()) {
         return indexSingleFile(imagePath)
       } else {
         console.error("Cannot search for that")
       }
     })
+}
+
+let indexDirectory = async (imagePath: string) => {
+  const files = await fs.readdir(imagePath)
+  return await Promise.all(
+    files
+      .map(file => path.join(imagePath, file))
+      .map(joinedPath => indexSingleFile(joinedPath))
+  )
 }
 
 let indexSingleFile = async (imagePath: string) => {
