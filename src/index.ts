@@ -9,14 +9,10 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
   tags TEXT
 )`).run()
 
-let analyzeText = (text: string) => { //how is a capitalized word getting through there?
-  return text.split(/\s+/)
-    .filter(item => {
-      if (item.length > 1 && words.check(item.toLowerCase())) {
-        return item.toLowerCase()
-      }
-    })
-}
+let analyzeText = (text: string) =>
+  text.split(/\s+/)
+    .filter(item => item.length > 1 && words.check(item.toLowerCase()))
+    .map(item => item.toLowerCase())
 
 let storeTags = (imagePath: string, tags: string[]) => {
   return new Promise((res, rej) => {
