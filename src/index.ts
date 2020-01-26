@@ -10,8 +10,8 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
   tags TEXT
 )`).run()
 
-let analyzeText = (text: string) =>
-  text.split(/\s+/)
+let processTags = (tags: string) =>
+  tags.split(/\s+/)
     .filter(item => item.length > 1)
     .map(item => item.toLowerCase())
     .filter(item => words.check(item))
@@ -49,7 +49,7 @@ let indexSingleFile = async (imagePath: string) => {
   try {
     const image = await fs.readFile(imagePath)
     const { data: { text } } = await Tesseract.recognize(image, 'eng', { logger: m => console.log(m) })
-    return storeTags(imagePath, analyzeText(text))
+    return storeTags(imagePath, processTags(text))
   } catch (error) {
     return console.error(error)
   }
