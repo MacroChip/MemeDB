@@ -23,7 +23,7 @@ db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
   path TEXT,
   tags TEXT
 )`).run();
-let analyzeText = (text) => text.split(/\s+/)
+let processTags = (tags) => tags.split(/\s+/)
     .filter(item => item.length > 1)
     .map(item => item.toLowerCase())
     .filter(item => words.check(item));
@@ -41,24 +41,27 @@ let index = (imagePath) => {
     fs_1.promises.stat(imagePath)
         .then((stats) => __awaiter(void 0, void 0, void 0, function* () {
         if (stats.isDirectory()) {
-            const files = yield fs_1.promises.readdir(imagePath);
-            return yield Promise.all(files
-                .map(file => path_1.default.join(imagePath, file))
-                .map(joinedPath => indexSingleFile(joinedPath)));
+            return indexDirectory(imagePath);
         }
         else if (stats.isFile()) {
             return indexSingleFile(imagePath);
         }
         else {
-            console.error("Cannot search for that");
+            console.error(`Cannot index ${imagePath}`);
         }
     }));
 };
+let indexDirectory = (imagePath) => __awaiter(void 0, void 0, void 0, function* () {
+    const files = yield fs_1.promises.readdir(imagePath);
+    return yield Promise.all(files
+        .map(file => path_1.default.join(imagePath, file))
+        .map(joinedPath => index(joinedPath)));
+});
 let indexSingleFile = (imagePath) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const image = yield fs_1.promises.readFile(imagePath);
         const { data: { text } } = yield tesseract_js_1.default.recognize(image, 'eng', { logger: m => console.log(m) });
-        return storeTags(imagePath, analyzeText(text));
+        return storeTags(imagePath, processTags(text));
     }
     catch (error) {
         return console.error(error);

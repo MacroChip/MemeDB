@@ -35,7 +35,7 @@ let index = (imagePath: string) => {
       } else if (stats.isFile()) {
         return indexSingleFile(imagePath)
       } else {
-        console.error("Cannot search for that")
+        console.error(`Cannot index ${imagePath}`)
       }
     })
 }
@@ -45,7 +45,7 @@ let indexDirectory = async (imagePath: string) => {
   return await Promise.all(
     files
       .map(file => path.join(imagePath, file))
-      .map(joinedPath => indexSingleFile(joinedPath))
+      .map(joinedPath => index(joinedPath))
   )
 }
 
