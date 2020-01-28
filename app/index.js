@@ -69,7 +69,10 @@ let indexSingleFile = (imagePath) => __awaiter(void 0, void 0, void 0, function*
 });
 let search = (tag) => {
     const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(` %${tag}% `); //TODO using LIKE is pretty flaky
-    console.log(row);
+    console.log(`Search results for "${tag}":`);
+    row.forEach((item) => {
+        console.log(`file://${item.path}`);
+    });
 };
 let command = process.argv[2];
 if (command === "index") {

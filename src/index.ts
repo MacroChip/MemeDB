@@ -61,7 +61,10 @@ let indexSingleFile = async (imagePath: string) => {
 
 let search = (tag: string) => {
   const row = db.prepare('SELECT path FROM Tags WHERE tags LIKE ?').all(` %${tag}% `) //TODO using LIKE is pretty flaky
-  console.log(row)
+  console.log(`Search results for "${tag}":`)
+  row.forEach((item: { path: string }) => {
+    console.log(`file://${item.path}`)
+  })
 }
 
 let command: string = process.argv[2]
