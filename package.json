@@ -11,10 +11,12 @@
   "author": "Chip Thien",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^13.1.8",
     "better-sqlite3": "^5.4.3",
     "is-word": "^1.0.4",
-    "tesseract.js": "^2.0.2",
+    "tesseract.js": "^2.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^13.1.8",
     "typescript": "^3.7.5"
   }
 }
