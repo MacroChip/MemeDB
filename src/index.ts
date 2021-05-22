@@ -2,13 +2,24 @@ import Tesseract from "tesseract.js"
 import { promises as fs } from "fs"
 import path from "path"
 import isWord from 'is-word'
+import { join } from 'path';
 const words = isWord('american-english')
 import betterSqlite3 from 'better-sqlite3'
-const db = betterSqlite3('meme-tags.db')
-db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
-  path TEXT,
-  tags TEXT
-)`).run()
+let db;
+
+let prepFiles = async () => {
+  const DATA_DIR = join(process.env.APPDATA || process.env.HOME, '.memedb');
+  await fs.stat(DATA_DIR).catch(e => {
+    console.log(`First run; making data directory at ${DATA_DIR}`);
+    return fs.mkdir(DATA_DIR);
+  });
+  db = betterSqlite3(join(DATA_DIR, 'meme-tags.db'))
+  db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
+    path TEXT,
+    tags TEXT
+  )`)
+    .run()
+}
 
 let processTags = (tags: string) =>
   tags.split(/\s+/)
@@ -67,9 +78,14 @@ let search = (tag: string) => {
   })
 }
 
-let command: string = process.argv[2]
-if (command === "index") {
-  index(process.argv[3])
-} else if (command === "search") {
-  search(process.argv[3])
-}
+(async () => {
+  await prepFiles();
+  let command: string = process.argv[2]
+  if (command === "index") {
+    index(process.argv[3])
+  } else if (command === "search") {
+    search(process.argv[3])
+  } else {
+    console.log(`Unrecognized command ${process.argv[2]}. Options are index and search.`);
+  }
+})()

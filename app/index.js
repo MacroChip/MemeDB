@@ -16,13 +16,23 @@ const tesseract_js_1 = __importDefault(require("tesseract.js"));
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const is_word_1 = __importDefault(require("is-word"));
+const path_2 = require("path");
 const words = is_word_1.default('american-english');
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
-const db = better_sqlite3_1.default('meme-tags.db');
-db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
-  path TEXT,
-  tags TEXT
-)`).run();
+let db;
+let prepFiles = () => __awaiter(void 0, void 0, void 0, function* () {
+    const DATA_DIR = path_2.join(process.env.HOME, '.memedb');
+    yield fs_1.promises.stat(DATA_DIR).catch(e => {
+        console.log(`First run; making data directory at ${DATA_DIR}`);
+        return fs_1.promises.mkdir(DATA_DIR);
+    });
+    db = better_sqlite3_1.default(path_2.join(process.env.HOME, '.memedb', 'meme-tags.db'));
+    db.prepare(`CREATE TABLE IF NOT EXISTS Tags (
+    path TEXT,
+    tags TEXT
+  )`)
+        .run();
+});
 let processTags = (tags) => tags.split(/\s+/)
     .filter(item => item.length > 1)
     .map(item => item.toLowerCase())
@@ -74,11 +84,17 @@ let search = (tag) => {
         console.log(`file://${item.path}`);
     });
 };
-let command = process.argv[2];
-if (command === "index") {
-    index(process.argv[3]);
-}
-else if (command === "search") {
-    search(process.argv[3]);
-}
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    yield prepFiles();
+    let command = process.argv[2];
+    if (command === "index") {
+        index(process.argv[3]);
+    }
+    else if (command === "search") {
+        search(process.argv[3]);
+    }
+    else {
+        console.log(`Unrecognized command ${process.argv[2]}. Options are index and search.`);
+    }
+}))();
 //# sourceMappingURL=index.js.map
