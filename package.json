@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "Tag memes based on the text in them",
   "main": "app/index.js",
+  "bin": "app/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc",
-    "start": "tsc && node app/index.js"
+    "start": "tsc && node app/index.js",
+    "pkg": "pkg",
+    "build": "tsc && pkg package.json"
   },
   "author": "Chip Thien",
   "license": "ISC",
@@ -17,6 +20,18 @@
   },
   "devDependencies": {
     "@types/node": "^13.1.8",
+    "pkg": "^5.2.0",
     "typescript": "^3.7.5"
+  },
+  "pkg": {
+    "assets": [
+      "node_modules/is-word/dictionary/american-english",
+      "eng.traineddata"
+    ],
+    "targets": [
+      "node14-linux-x64",
+      "node14-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }
