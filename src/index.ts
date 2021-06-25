@@ -80,11 +80,16 @@ let search = (tag: string) => {
 
 (async () => {
   await prepFiles();
-  let command: string = process.argv[2]
+  let command = process.argv[2];
+  let parameter = process.argv[3];
+  if (!command || !parameter) {
+    console.log(`Invalid usage. Usage is "index ABSOLUTE-PATH" or "search KEYWORD"`);
+    return;
+  }
   if (command === "index") {
-    index(process.argv[3])
+    index(parameter);
   } else if (command === "search") {
-    search(process.argv[3])
+    search(parameter);
   } else {
     console.log(`Unrecognized command ${process.argv[2]}. Options are index and search.`);
   }
