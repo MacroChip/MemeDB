@@ -83,14 +83,16 @@ let search = (tag: string) => {
   let command = process.argv[2];
   let parameter = process.argv[3];
   if (!command || !parameter) {
-    console.log(`Invalid usage. Usage is "index ABSOLUTE-PATH" or "search KEYWORD"`);
+    console.log(`Invalid usage. Usage is "index PATH" or "search KEYWORD"`);
     return;
   }
   if (command === "index") {
-    index(parameter);
+    let resolvedPath = path.resolve(parameter);
+    console.log(`Debug: path ${parameter} resolved as ${resolvedPath}`);
+    index(resolvedPath);
   } else if (command === "search") {
     search(parameter);
   } else {
     console.log(`Unrecognized command ${process.argv[2]}. Options are index and search.`);
   }
-})()
+})();
